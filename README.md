@@ -39,4 +39,4 @@ python Tester_fin.py --path=image_path --mode=com --qf=qf
 python Tester_fin.py --path=decompress_dir_path --mode=dec --new_path=new_image_path
 
 # Testing
-python Tester_fin.py --path=image_path --mode=dec --new_path=new_image_path --qf=qf
+python Tester_fin.py --path=image_path --mode=all --new_path=new_image_path --qf=qf
