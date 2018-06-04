@@ -26,10 +26,11 @@ h = tf.placeholder(tf.int32)
 w = tf.placeholder(tf.int32)
 sess = tf.Session()
 
+temp_path = './temp_aic'
+
 def get_data_from_zip(path):
     global Data, slice_size, max_skip, img_size, isExtract
-    myzip = zipfile.ZipFile(args.path, 'r')
-    temp_path = './temp_aic'
+    myzip = zipfile.ZipFile(path, 'r')
     myzip.extractall(temp_path)
 
     img_path = temp_path+"/img_com.jpeg"
@@ -178,8 +179,6 @@ img_real_final = img_final + img_cor
 
 saver = tf.train.Saver(var_list)
 
-temp_path = './temp_AIC'
-
 def decompress(sess, new_path):
     Img_com = PILImage.open(temp_path+'/img_com.jpeg')
     img_compressed = image_to_np(Img_com)
@@ -248,21 +247,29 @@ path = ' '
 new_path = ' '
 
 def f_path():
-    global path
+    global path, sess
     path = askopenfilename()
+    get_data_from_zip(path)
     t_path['text'] = path
-    print("path : "+ path)
-    
+    print("path : " + path)
+    sess.close()
+    init = tf.global_variables_initializer()
+    config = tf.ConfigProto(device_count={'GPU':0})
+    sess = tf.Session(config=config)
+    sess.run(init)
+    #saver = tf.train.Saver()
+    saver.restore(sess, "./model/r-model.ckpt-qf=10-best")
+
 def f_newpath():
     global new_path
     new_path = asksaveasfilename()
     t_newpath['text'] = new_path
     print("new_path : "+ new_path)
 
-def f_start():        
+def f_start():
     print("Started compressing " + path)
     print("Executed :\n" + "python AIC_main.py --path="+path+" --new_path="+new_path+" --mode=dec")
-    os.system("python AIC_main.py --path="+path+" --new_path="+new_path+" --mode=dec")
+    decompress(sess, new_path = new_path)
 
 def f_cancel():
     print("Cancelled")
