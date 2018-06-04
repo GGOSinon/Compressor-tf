@@ -22,7 +22,7 @@ You can install these libraries by using 'requirements.txt' in the project.
 # Windows(PyCharm)
 1. To install the project, you can download the entire project in this page.
 
-2. To install requirements, you must install these libraries manually in PyCharm.(pip 10.1.0 recommended)
+2. To install requirements, you must install these libraries manually in PyCharm.(pip 9.0.3 recommended)
 
 # Using GPU
 If you want to use GPU, then several steps must be added.
