@@ -20,7 +20,7 @@ import tensorflow.contrib.slim as slim
 import numpy as np
 import math
 import os
-import zipfile    
+import zipfile
 from ImageFunctions import *
 from PIL import Image
 from skimage.measure import compare_ssim as ssim
@@ -37,7 +37,7 @@ if args.mode=='com' or args.mode=='all':
         slice_size = [min_sz, min_sz]
         max_skip = [slice_size[0]-dsz, slice_size[1]-dsz]
     Data = make_batch_with_path(args.path, max_skip = max_skip, slice_size = slice_size)
-    
+
     test_size = Data.shape[0]
     print(Data.shape)
     h, w, c = Data.shape[1], Data.shape[2], 1
@@ -66,7 +66,7 @@ var_list = []
 
 gpu_device = ['/device:GPU:0', '/device:GPU:1']
 img_input = tf.placeholder(tf.float32, [None, h, w, c])
-img_ans = tf.placeholder(tf.float32, [None, h, w, c]) 
+img_ans = tf.placeholder(tf.float32, [None, h, w, c])
 img_input_cor = tf.placeholder(tf.float32, [None, h, w, c])
 img_input_gen = tf.placeholder(tf.float32, [None, h, w, c])
 
@@ -93,7 +93,7 @@ def com_net(x, weights, biases):
     for i in range(2, 2):
     	name_w = 'wc'+str(i)
     	name_b = 'bc'+str(i)
-    	x = conv2d(x, weights[name_w], biases[name_b], act_func = 'LReLU')   
+    	x = conv2d(x, weights[name_w], biases[name_b], act_func = 'LReLU')
     res = conv2d(x, weights['wcx'], biases['bcx'], act_func='Sigmoid', use_bn = False)
     return res
 
@@ -119,7 +119,7 @@ def cor_net(x, weights, biases):
     for i in range(2, 2):
     	name_w = 'wc'+str(i)
     	name_b = 'bc'+str(i)
-    	x = conv2d(x, weights[name_w], biases[name_b], act_func = 'LReLU') 
+    	x = conv2d(x, weights[name_w], biases[name_b], act_func = 'LReLU')
     res = conv2d(x, weights['wcx'], biases['bcx'], act_func='TanH', use_bn = False)
     return res
 
@@ -134,18 +134,18 @@ def make_bias(x, name):
     return var
 
 def make_dict(num_layer, num_filter, end_str, s_filter = 1, e_filter = 1):
-    
+
     result = {}
     weights = {}
     biases = {}
-    
+
     weights['wc1'] = make_grad(s_filter,num_filter,"w1"+end_str)
     for i in range(2, num_layer):
     	index = 'wc' + str(i)
     	name = 'w' + str(i) + end_str
     	weights[index] = make_grad(num_filter, num_filter, name)
     weights['wcx'] = make_grad(num_filter,e_filter,"wx"+end_str)
-    
+
     biases['bc1'] = make_bias(num_filter,"b1"+end_str)
     for i in range(2, num_layer):
     	index = 'bc' + str(i)
@@ -153,7 +153,7 @@ def make_dict(num_layer, num_filter, end_str, s_filter = 1, e_filter = 1):
     	name = 'b' + str(i) + end_str
     	biases[index] = make_bias(num_filter, name)
     biases['bcx'] = make_bias(e_filter,"bx"+end_str)
-    
+
     result['weights'] = weights
     result['biases'] = biases
     return result
@@ -214,8 +214,8 @@ saver = tf.train.Saver(var_list)
 
 def compress(sess, batch_x, new_path):
     feed_dict = {img_input: batch_x}
-    img_compressed = sess.run(img_com, feed_dict = feed_dict) 
-    img_compressed = merge_image(img_compressed, img_size=img_size, max_skip=max_skip, slice_size=slice_size) 
+    img_compressed = sess.run(img_com, feed_dict = feed_dict)
+    img_compressed = merge_image(img_compressed, img_size=img_size, max_skip=max_skip, slice_size=slice_size)
     Img_com = np_to_image(img_compressed)
     Img_com.save('img_com.jpeg', quality=qf)
 
@@ -223,10 +223,10 @@ def compress(sess, batch_x, new_path):
         batch_jpeg = get_jpeg_from_image(img_compressed, qf)
         batch_jpeg = make_batch_with_np(batch_jpeg, max_skip, slice_size)
         feed_dict = {img_input_gen: batch_jpeg}
-        
+
         img_fin = sess.run(img_final, feed_dict = feed_dict)
         img_inc, img_val = cor_compress(img_fin, batch_x)
-        
+
         np.save('img_inc.npy', img_inc)
         np.save('img_val.npy', img_val)
 
@@ -238,7 +238,7 @@ def compress(sess, batch_x, new_path):
             myzip.write('img_val.npy')
             os.remove('img_inc.npy')
             os.remove('img_val.npy')
-    
+
 
 def decompress(sess, new_path):
     Img_com = Image.open(temp_path+'/img_com.jpeg')
@@ -250,7 +250,7 @@ def decompress(sess, new_path):
     print('Start decompressing')
     feed_dict = {img_input_gen: batch_jpeg}
     img_fin = sess.run(img_final, feed_dict = feed_dict)
-    
+
     if os.path.isfile(temp_path+'/img_inc.npy'): isExtract = True
     else: isExtract = False
 
@@ -266,11 +266,11 @@ def decompress(sess, new_path):
         img_real_fin = sess.run(img_real_final, feed_dict = feed_dict)
         img_real_fin = merge_image(img_real_fin, img_size=img_size, max_skip=max_skip, slice_size=slice_size)
         img_real_fin = bound_img(img_real_fin)
-        
+
         Img_fin = np_to_image(img_real_fin)
         Img_fin.save(new_path)
         os.rmdir(temp_path)
-        img_fin = merge_image(img_fin, img_size=img_size, max_skip=max_skip, slice_size=slice_size) 
+        img_fin = merge_image(img_fin, img_size=img_size, max_skip=max_skip, slice_size=slice_size)
         return img_fin, img_real_fin
     else:
         print('End decompressing')
@@ -280,8 +280,8 @@ def decompress(sess, new_path):
         Img_fin.save(new_path)
         os.rmdir(temp_path)
         return img_fin
-    
-with sess: 
+
+with sess:
     sess.run(init)
     #saver = tf.train.Saver()
     saver.restore(sess, "./model/r-model.ckpt-qf=10-best")
@@ -290,7 +290,7 @@ with sess:
     if args.mode == 'com':
         compress(sess, Data, new_path = args.new_path)
     elif args.mode == 'dec':
-    	decompress(sess, new_path = args.new_path) 
+    	decompress(sess, new_path = args.new_path)
     elif args.mode == 'all':
         compress(sess, Data, new_path = 'X.aic')
         myzip = zipfile.ZipFile('X.aic', 'r')
@@ -304,7 +304,7 @@ with sess:
 
         batch_jpeg = get_jpeg_from_image(ans, qf)
         batch_jpeg = bound_img(batch_jpeg)
-        
+
         Img_jpeg = np_to_image(batch_jpeg)
         Img_jpeg.save('result_jpeg.jpeg', qf=qf)
         print(str(step)+": "+"PSNR = {:.5f}".format(get_psnr(batch_jpeg, ans))+" SSIM = {:.5f}".format(get_ssim(batch_jpeg, ans)))

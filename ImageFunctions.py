@@ -148,7 +148,7 @@ def get_mse(x, y):
     mse = (delta**2).mean(axis=None)
     return mse
 
-def get_psnr(x, y): 
+def get_psnr(x, y):
     mse = get_mse(x, y)
     return -10*(math.log(mse)/math.log(10))
 
