@@ -28,7 +28,7 @@ w = tf.placeholder(tf.int32)
 sess = tf.Session()
 
 def get_data_from_image(path):
-    global Data, slice_size, max_skip, img_size
+    global Data, slice_size, max_skip, img_size, n_prob
     img_size = get_size(path)
     min_sz = min(img_size[0], img_size[1])
     slice_size = [256, 256]
@@ -173,7 +173,7 @@ img_real_final = img_final + img_cor
 
 saver = tf.train.Saver(var_list)
 
-temp_path = './temp_AIC'
+temp_path = './temp_aic'
 
 def compress(sess, batch_x, new_path, qf):
     feed_dict = {img_input: batch_x, h:slice_size[0], w:slice_size[1]}
@@ -182,6 +182,7 @@ def compress(sess, batch_x, new_path, qf):
     img_compressed = merge_image(img_compressed, img_size=img_size, max_skip=max_skip, slice_size=slice_size)
     Img_com = np_to_image(img_compressed)
     Img_com.save('img_com.jpeg', quality=qf)
+    Img_com.save('img_com2.jpeg', quality=qf)
 
     if isExtract:
         batch_jpeg = get_jpeg_from_image(img_compressed, qf)
@@ -259,13 +260,12 @@ def get_res(sess, path, batch_x, qf):
         Img_fin = np_to_image(img_fin)
 
     ans = make_data_with_path(path)
-    batch_jpeg = get_jpeg_from_image(ans, qf)
-    batch_jpeg = bound_img(batch_jpeg)
-    Img_jpeg = np_to_image(batch_jpeg)
+    ans = bound_img(ans)
+    Img_ans = np_to_image(ans)
 
-    Img_jpeg.thumbnail([200, 200], PILImage.ANTIALIAS)
+    Img_ans.thumbnail([200, 200], PILImage.ANTIALIAS)
     Img_fin.thumbnail([200, 200], PILImage.ANTIALIAS)
-    return Img_jpeg, Img_fin
+    return Img_ans, Img_fin
 
 from tkinter import *
 from tkinter.filedialog import askopenfilename, asksaveasfilename
@@ -297,16 +297,17 @@ def f_newpath():
     print("new_path : "+ new_path)
 
 def e_ext():
-    global isExtarct
+    global isExtract
     isExtract = checkVar.get()
 
 def f_preview():
     print("Started Preview")
     qf = int(t_qf.get())
-    Img_jpeg, Img_res = get_res(sess, path = path, batch_x = Data, qf = qf)
-    Img_jpeg, Img_res = ImageTk.PhotoImage(Img_jpeg), ImageTk.PhotoImage(Img_res)
-    photo_jpeg.configure(image = Img_jpeg)
-    photo_jpeg.image = Img_jpeg
+    print(isExtract, n_prob)
+    Img_ans, Img_res = get_res(sess, path = path, batch_x = Data, qf = qf)
+    Img_ans, Img_res = ImageTk.PhotoImage(Img_ans), ImageTk.PhotoImage(Img_res)
+    photo_ans.configure(image = Img_ans)
+    photo_ans.image = Img_ans
     photo_res.configure(image = Img_res)
     photo_res.image = Img_res
 
@@ -358,13 +359,13 @@ b2.place(x=390, y=33+dy)
 radioVar = IntVar()
 radioVar.set(1)
 dy = 115
-tqf = Radiobutton(root, text = 'Quality Factor', bg='white', command=f_qf, variable=radioVar, value=1)
+tqf = Radiobutton(root, text = 'Quality Factor (1 ~ 100)', bg='white', command=f_qf, variable=radioVar, value=1)
 tqf.place(x=35, y=35+dy)
 t_qf = Entry(root, justify = LEFT, bg='white', borderwidth=1,  relief='solid')
 
 t_qf.place(x=35, y=60+dy, width=200)
 
-tcr = Radiobutton(root, text = 'Compression Rate', bg='white', command=f_cr, variable=radioVar, value=2)
+tcr = Radiobutton(root, text = 'Compression Rate (0 ~ 1)', bg='white', command=f_cr, variable=radioVar, value=2)
 tcr.place(x=255, y=35+dy)
 t_cr = Entry(root, justify = LEFT, bg='white', borderwidth=1,  relief='solid', state='disabled')
 t_cr.place(x=255, y=60+dy, width=200)
@@ -382,8 +383,8 @@ bStart.place(x=300, y=210, width=65)
 bStart = Button(root, text = "Cancel", anchor = CENTER, justify = CENTER, padx = 10, command = f_cancel)
 bStart.place(x=390, y=210, width=65)
 
-photo_jpeg = Label()
-photo_jpeg.place(x=35, y=250, width=200, height=200)
+photo_ans = Label()
+photo_ans.place(x=35, y=250, width=200, height=200)
 
 photo_res = Label()
 photo_res.place(x=255, y=250, width=200, height=200)

@@ -37,9 +37,10 @@ def get_cord(sz, mx_skip, slice_sz):
 
 def merge_image(img, img_size, max_skip, slice_size):
     dsz = (slice_size[0] - max_skip[0])//2, (slice_size[1]- max_skip[1])//2
+    #print(dsz)
     hlist = get_cord(img_size[0], max_skip[0], slice_size[0])
     wlist = get_cord(img_size[1], max_skip[1], slice_size[1])
-    print(img.shape, (img_size[1], img_size[0]), max_skip, slice_size, hlist, wlist)
+    #print(img.shape, (img_size[1], img_size[0]), max_skip, slice_size, hlist, wlist)
     H, W = len(hlist), len(wlist)
     img = np.reshape(img, (H, W, slice_size[0], slice_size[1]))
     new_img = np.zeros((img_size[1], img_size[0]), dtype=np.float32)
@@ -66,11 +67,11 @@ def merge_image(img, img_size, max_skip, slice_size):
         for j in range(img_size[0]):
             new_img[i][j]/=chk_img[i][j]
 
-    print(chk_img)
+    #print(chk_img)
     return new_img
 
 def get_jpeg_from_image(img, qf = 10):
-    print(img.shape)
+    #print(img.shape)
     img = denormalize_img(img)
     h, w = img.shape[0], img.shape[1]
     img = np.reshape(img, (h, w))
@@ -79,7 +80,7 @@ def get_jpeg_from_image(img, qf = 10):
     img.save('temp.jpeg', quality=qf)
     img = Image.open('temp.jpeg')
     img = image_to_np(img)
-    print(img.size)
+    #print(img.size)
     os.remove('temp.jpeg')
     return img
 
@@ -105,12 +106,11 @@ def image_to_np(Img):
 
 def make_data_with_path(image_path, isTest = False):
     image = Image.open(image_path)
-    new_image_list = []
     h = image.size[0]
     w = image.size[1]
     if len(image.tobytes()) == h*w: is_gray = True
     else: is_gray = False
-    if is_gray==False: image = ImageOps.grayscale(image)
+    if is_gray==False: image = image.convert('L', (0.2989, 0.5870, 0.1140, 0))#image = ImageOps.grayscale(image)
     return image_to_np(image)
 
 def split_image(image, max_skip, slice_size):
@@ -137,7 +137,7 @@ def make_batch_with_path(image_path, max_skip, slice_size):
     return split_image(image, max_skip=max_skip, slice_size=slice_size)
 
 def make_batch_with_np(image_np, max_skip, slice_size):
-    print(image_np.shape)
+    #print(image_np.shape)
     img = np_to_image(image_np)
     return split_image(img, max_skip, slice_size)
 
@@ -158,5 +158,5 @@ def get_ssim(x, y):
     x = np.array(x, dtype=np.float64)
     y = np.array(y, dtype=np.float64)
     xy = np.stack((x,y), axis=0)
-    print(x.shape)
+    #print(x.shape)
     return ssim(x, y, data_range=1., gaussian_weights = True, sigma=1.5, use_sample_convariance = False)
