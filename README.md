@@ -2,19 +2,21 @@
 Tensorflow compressor for high resolution images.
 
 # Requirements
-numpy==1.11.0
+python>=3.5
 
-scikit_image==0.13.1
+numpy>=1.11.0
 
-Pillow==5.1.0
+scikit_image>=0.13.1
 
-tensorflow==1.8.0
+Pillow>=5.1.0
+
+tensorflow>=1.8.0
 
 You can install these libraries by using 'requirements.txt' in the project.
 
 # Installation
 
-# Unix(Linux, Mac)
+# Unix(Linux, Mac, Windows(Anaconda))
 1. To install this project, type 'git clone https://github.com/GGOSinon/Compressor-tf/' in terminal
 
 2. To install requirements, type 'pip install -r requirements.txt' in terminal.
@@ -24,19 +26,13 @@ You can install these libraries by using 'requirements.txt' in the project.
 
 2. To install requirements, you must install these libraries manually in PyCharm.(pip 9.0.3 recommended)
 
-# Using GPU
-If you want to use GPU, then several steps must be added.
-1. Install tensorflow-gpu==1.7.0
-2. Install CUDA 9, cudnn 9.0.0.
-
-# Usage
-You can read informations by typing 'python Tester_fin.py --help'.
-
 # Compression
-python Tester_fin.py --path=image_path --mode=com --qf=qf
+python Compressor.py
+
+You can preview the image after the compression and choose the appropriate Q value.
+
+Note : Compression rate & Additional Extract are not implemented yet.
 
 # Decompression
-python Tester_fin.py --path=decompress_dir_path --mode=dec --new_path=new_image_path
+python Decompressor.py
 
-# Testing
-python Tester_fin.py --path=image_path --mode=all --new_path=new_image_path --qf=qf
